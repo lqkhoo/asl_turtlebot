@@ -159,9 +159,15 @@ class Detector:
 
         ########## Code starts here ##########
         # TODO: Compute x, y, z.
-        x = 0.
-        y = 0.
-        z = 1.
+        cx, cy = self.cx, self.cy
+        fx, fy = self.fx, self.fy
+
+        x = (u - cx) / fx
+        y = (v - cy) / fy
+        z = 1
+        # Normalize since we want a unit vector
+        norm = np.sqrt(x*x + y*y + 1)
+        x, y, z = x/norm, y/norm, z/norm
         ########## Code ends here ##########
 
         return x, y, z
@@ -258,10 +264,12 @@ class Detector:
 
         ########## Code starts here ##########
         # TODO: Extract camera intrinsic parameters.
-        self.cx = 0.
-        self.cy = 0.
-        self.fx = 1.
-        self.fy = 1.
+        P = msg.P # Model assumes no skew
+        # http://docs.ros.org/en/api/sensor_msgs/html/msg/CameraInfo.html
+        self.cx = P[2]
+        self.cy = P[6]
+        self.fx = P[0]
+        self.fy = P[5]
         ########## Code ends here ##########
 
     def laser_callback(self, msg):
