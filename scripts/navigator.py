@@ -107,6 +107,8 @@ class Navigator:
         rospy.Subscriber('/map_metadata', MapMetaData, self.map_md_callback)
         rospy.Subscriber('/cmd_nav', Pose2D, self.cmd_nav_callback)
 
+        # Section 6
+
         print "finished init"
         
     def dyn_cfg_callback(self, config, level):
@@ -369,6 +371,9 @@ class Navigator:
                     self.switch_mode(Mode.IDLE)
 
             self.publish_control()
+
+            self.pose_controller.publish() # For section 6
+
             rate.sleep()
 
 if __name__ == '__main__':    

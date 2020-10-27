@@ -1,11 +1,15 @@
 import numpy as np
 from utils import wrapToPi
 
+import rospy
+from std_msgs.msg import Float64
+
 # command zero velocities once we are this close to the goal
 RHO_THRES = 0.05
 ALPHA_THRES = 0.1
 DELTA_THRES = 0.1
 
+# Modified for section 6 to be a sub-node
 class PoseController:
     """ Pose stabilization controller """
     def __init__(self, k1, k2, k3, V_max=0.5, om_max=1):
@@ -15,6 +19,21 @@ class PoseController:
 
         self.V_max = V_max
         self.om_max = om_max
+
+        self.last_alpha = None
+        self.last_delta = None
+        self.last_theta = None
+
+        # ROS stuff
+        self.pub_alpha = rospy.Publisher('/controller/alpha', Float64, queue_size=10)
+        self.pub_delta = rospy.Publisher('/controller/delta', Float64, queue_size=10)
+        self.pub_theta = rospy.Publisher('/controller/theta', Float64, queue_size=10)
+
+    def publish(self):
+        if self.last_alpha is not None:
+            self.pub_alpha.publish(self.last_alpha)
+            self.pub_delta.publish(self.last_delta)
+            self.pub_theta.publish(self.last_theta)
 
     def load_goal(self, x_g, y_g, th_g):
         """ Loads in a new goal position """
@@ -65,6 +84,11 @@ class PoseController:
         if rho < RHO_THRES and alpha < ALPHA_THRES and delta < DELTA_THRES:
             V = 0
             om = 0
+
+        # For section 6
+        self.last_alpha = alpha
+        self.last_delta = delta
+        self.last_theta = th
         
         ########## Code ends here ##########
 
